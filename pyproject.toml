@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name         = "esphome-dashboard-api"
-version      = "1.0"
+version      = "1.2"
 license      = {text = "MIT"}
 description  = "API to interact with ESPHome Dashboard"
 readme       = "README.md"
@@ -12,6 +12,9 @@ authors      = [
     {name = "ESPHome", email = "esphome@nabucasa.com"}
 ]
 requires-python = ">=3.4.0"
+dependencies = [
+  "aiohttp",
+]
 
 [project.urls]
 "Homepage" = "https://github.com/home-assistant/frontend"

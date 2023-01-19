@@ -1,10 +1,10 @@
 """API to interact with the ESPHome dashboard."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypedDict
+import logging
+from typing import Any, Callable, TypedDict
 
-if TYPE_CHECKING:
-    import aiohttp
+import aiohttp
 
 
 class ConfiguredDevice(TypedDict):
@@ -44,14 +44,48 @@ class ESPHomeDashboardAPI:
 
     def __init__(self, url: str, session: aiohttp.ClientSession) -> None:
         """Initialize."""
-        self._url = url
-        self._session = session
+        self.url = url
+        self.session = session
 
     async def request(self, method, path, **kwargs) -> dict:
         """Make a request to the dashboard."""
-        resp = await self._session.request(method, f"{self._url}/{path}", **kwargs)
+        resp = await self.session.request(method, f"{self.url}/{path}", **kwargs)
         resp.raise_for_status()
         return await resp.json()
+
+    async def stream_logs(
+        self,
+        path: str,
+        params: dict[str, Any],
+        line_received_cb: Callable[[str], None] | None = None,
+    ) -> bool:
+        """Stream the logs from an ESPHome dashboard command."""
+        async with self.session.ws_connect(
+            f"{self.url}/{path}",
+        ) as client:
+            await client.send_json({"type": "spawn", **params})
+
+            async for msg in client:
+                if msg.type != aiohttp.WSMsgType.TEXT:
+                    return False
+
+                data = msg.json()
+
+                event = data.get("event")
+
+                if event == "exit":
+                    return data["code"] == 0
+
+                if event != "line":
+                    logging.getLogger(__name__).error(
+                        "Unexpected event during %s: %s", path, event
+                    )
+                    return False
+
+                if line_received_cb:
+                    line_received_cb(data["data"])
+
+        return False
 
     async def get_config(self, configuration: str) -> dict | None:
         """Get a configuration."""
@@ -76,3 +110,16 @@ class ESPHomeDashboardAPI:
     async def get_devices(self) -> Devices:
         """Get all devices."""
         return await self.request("GET", "devices")
+
+    async def upload(
+        self,
+        configuration: str,
+        port: str,
+        line_received_cb: Callable[[str], None] | None = None,
+    ) -> bool:
+        """Upload a configuration."""
+        return await self.stream_logs(
+            "upload",
+            {"configuration": configuration, "port": port},
+            line_received_cb,
+        )
