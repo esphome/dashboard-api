@@ -111,6 +111,18 @@ class ESPHomeDashboardAPI:
         """Get all devices."""
         return await self.request("GET", "devices")
 
+    async def compile(
+        self,
+        configuration: str,
+        line_received_cb: Callable[[str], None] | None = None,
+    ) -> bool:
+        """Compile a configuration."""
+        return await self.stream_logs(
+            "compile",
+            {"configuration": configuration},
+            line_received_cb,
+        )
+
     async def upload(
         self,
         configuration: str,
