@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/home-assistant/frontend"
+"Homepage" = "https://github.com/esphome/dashboard-api"
 
 [tool.setuptools]
 platforms = ["any"]
