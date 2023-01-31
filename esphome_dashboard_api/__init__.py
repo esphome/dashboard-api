@@ -105,7 +105,17 @@ class ESPHomeDashboardAPI:
         if not config:
             return None
 
-        return config.get("api", {}).get("encryption", {}).get("key")
+        api = config.get("api")
+        # An empty `api:` section in yaml produces a null object in json
+        if api is None:
+            return None
+
+        encryption = api.get("encryption")
+
+        if encryption is None:
+            return None
+
+        return encryption.get("key")
 
     async def get_devices(self) -> Devices:
         """Get all devices."""
