@@ -113,7 +113,7 @@ class ESPHomeDashboardAPI:
         encryption = api.get("encryption")
 
         if encryption is None:
-            return
+            return None
 
         return encryption.get("key")
 
