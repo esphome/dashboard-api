@@ -1,4 +1,5 @@
 """API to interact with the ESPHome dashboard."""
+
 from __future__ import annotations
 
 import logging
@@ -48,7 +49,7 @@ class ESPHomeDashboardAPI:
         self.url = url
         self.session = session
 
-    async def request(self, method, path, **kwargs) -> dict:
+    async def request(self, method: str, path: str, **kwargs: Any) -> dict:
         """Make a request to the dashboard."""
         resp = await self.session.request(method, f"{self.url}/{path}", **kwargs)
         resp.raise_for_status()
@@ -106,12 +107,12 @@ class ESPHomeDashboardAPI:
         if not config:
             return None
 
-        api = config.get("api")
+        api: dict[str, Any] | None = config.get("api")
         # An empty `api:` section in yaml produces a null object in json
         if api is None:
             return None
 
-        encryption = api.get("encryption")
+        encryption: dict[str, Any] | None = api.get("encryption")
 
         if encryption is None:
             return None
