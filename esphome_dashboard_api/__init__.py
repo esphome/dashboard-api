@@ -6,6 +6,7 @@ import logging
 from typing import Any, Callable, TypedDict
 
 import aiohttp
+import orjson
 
 
 class ConfiguredDevice(TypedDict):
@@ -70,7 +71,7 @@ class ESPHomeDashboardAPI:
                 if msg.type != aiohttp.WSMsgType.TEXT:
                     return False
 
-                data = msg.json()
+                data = msg.json(loads=orjson.loads)
 
                 event = data.get("event")
 
