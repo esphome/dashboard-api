@@ -123,6 +123,15 @@ class ESPHomeDashboardAPI:
         """Get all devices."""
         return await self.request("GET", "devices")
 
+    async def post_encryption_key(
+        self, device_name: str, key: str, mac: str | None = None
+    ) -> dict:
+        """Send an API encryption key to the dashboard for a device."""
+        payload: dict[str, Any] = {"device_name": device_name, "key": key}
+        if mac:
+            payload["mac"] = mac
+        return await self.request("POST", "encryption-key", json=payload)
+
     async def compile(
         self,
         configuration: str,
